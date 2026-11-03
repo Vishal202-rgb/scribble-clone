@@ -1,0 +1,26 @@
+{
+  "animals": [
+    "cat", "dog", "elephant", "giraffe", "monkey", "lion", "tiger", "rabbit", "penguin", "dolphin",
+    "kangaroo", "panda", "fox", "bear", "zebra", "snake", "owl", "parrot", "shark", "whale",
+    "octopus", "turtle", "frog", "butterfly", "bee", "crocodile", "flamingo", "hamster", "hedgehog", "camel"
+  ],
+  "objects": [
+    "chair", "table", "clock", "laptop", "telephone", "backpack", "umbrella", "pencil", "guitar", "camera",
+    "bottle", "glasses", "lamp", "mirror", "scissors", "toothbrush", "keyboard", "headphones", "spoon", "watch",
+    "bicycle", "telescope", "candle", "trophy", "skateboard", "compass", "paintbrush", "pillow", "flashlight", "ladder"
+  ],
+  "food": [
+    "pizza", "burger", "ice cream", "apple", "banana", "sandwich", "spaghetti", "pancake", "cookie", "chocolate",
+    "donut", "sushi", "watermelon", "popcorn", "taco", "croissant", "strawberry", "pineapple", "cupcake", "egg",
+    "hot dog", "french fries", "cheese", "lollipop", "muffin", "cherry", "avocado", "waffle", "salad", "burrito"
+  ],
+  "places": [
+    "beach", "castle", "hospital", "school", "library", "airport", "park", "museum", "island", "mountain",
+    "forest", "desert", "cinema", "hotel", "bridge", "farm", "stadium", "space", "bakery", "zoo",
+    "lighthouse", "pyramid", "volcano", "amusement park", "playground", "dungeon", "waterfall", "circus", "harbor", "igloo"
+  ],
+  "actions": [
+    "swimming", "dancing", "sleeping", "running", "cooking", "reading", "singing", "jumping", "flying", "fishing",
+    "climbing", "skating", "painting", "crying", "laughing", "driving", "gardening", "juggling", "bowling", "surfing"
+  ]
+}

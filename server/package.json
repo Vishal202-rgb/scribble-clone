@@ -1,0 +1,20 @@
+{
+  "name": "skribbl-clone-server",
+  "version": "1.0.0",
+  "description": "Multiplayer drawing & guessing game backend with Express and Socket.IO",
+  "main": "src/server.js",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
