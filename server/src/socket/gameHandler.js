@@ -67,6 +67,12 @@ export function registerGameHandler(io, socket) {
       const room = roomStore.getRoom(mapping.roomId);
       if (!room || !room.game) return;
 
+      const drawer = room.getPlayer(mapping.playerId);
+      if (drawer && drawer.socketId !== socket.id) {
+        drawer.socketId = socket.id;
+        roomStore.registerSocket(socket.id, room.id, drawer.id);
+      }
+
       const success = room.game.chooseWord(mapping.playerId, payload.word);
       if (!success) {
         const errorMsg = 'Invalid word selection or not current drawer.';

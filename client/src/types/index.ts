@@ -51,6 +51,7 @@ export interface RoundStartData {
   drawTime: number;
   round: number;
   totalRounds: number;
+  players?: Player[];
 }
 
 export interface RoundEndData {

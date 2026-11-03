@@ -112,6 +112,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // Handle remote incoming draw points
   useEffect(() => {
     if (!remoteDrawData) return;
+    // Authorized drawer draws locally in real time; skip remote echo to prevent jitter/duplicate strokes
+    if (isDrawer) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -133,7 +136,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     } else if (remoteDrawData.type === 'end') {
       ctx.closePath();
     }
-  }, [remoteDrawData]);
+  }, [remoteDrawData, isDrawer]);
 
   // Convert mouse/touch coordinates to internal 800x600 coordinates
   const getCoordinates = (
@@ -178,6 +181,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const activeColor = isEraser ? '#FFFFFF' : currentColor;
     const activeSize = isEraser ? currentSize * 2 : currentSize;
 
+    // Direct immediate local rendering on canvas
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.beginPath();
+        ctx.strokeStyle = activeColor;
+        ctx.lineWidth = activeSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(coords.x, coords.y);
+        ctx.lineTo(coords.x + 0.1, coords.y + 0.1);
+        ctx.stroke();
+      }
+    }
+
     onDrawStart(coords.x, coords.y, activeColor, activeSize);
   };
 
@@ -188,12 +207,29 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const coords = getCoordinates(e);
     if (!coords) return;
 
+    // Direct immediate local line drawing on canvas
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.lineTo(coords.x, coords.y);
+        ctx.stroke();
+      }
+    }
+
     onDrawMove(coords.x, coords.y);
   };
 
   const handlePointerUp = () => {
     if (!isDrawer || !isDrawingLocal) return;
     setIsDrawingLocal(false);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.closePath();
+      }
+    }
     onDrawEnd();
   };
 
@@ -341,7 +377,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             <button
               type="button"
               title="Clear Canvas"
-              onClick={onClear}
+              onClick={() => {
+                clearLocalCanvas();
+                onClear();
+              }}
               className="p-2 rounded-lg border border-mono-border bg-mono-white text-mono-secondary hover:text-mono-text hover:border-mono-text transition-all"
             >
               <Trash2 size={14} />

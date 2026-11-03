@@ -43,15 +43,13 @@ export function registerDrawingHandler(io, socket) {
       points: [{ x, y }]
     };
 
-    // Broadcast stroke start to everyone in room (including drawer for exact sync)
-    context.room.players.forEach(p => {
-      io.to(p.socketId).emit('draw_data', {
-        type: 'start',
-        x,
-        y,
-        color: currentStroke.color,
-        size: currentStroke.size
-      });
+    // Broadcast stroke start to everyone in room
+    io.to(context.room.id).emit('draw_data', {
+      type: 'start',
+      x,
+      y,
+      color: currentStroke.color,
+      size: currentStroke.size
     });
   });
 
@@ -68,13 +66,11 @@ export function registerDrawingHandler(io, socket) {
 
     currentStroke.points.push({ x, y });
 
-    // Broadcast coordinate step
-    context.room.players.forEach(p => {
-      io.to(p.socketId).emit('draw_data', {
-        type: 'move',
-        x,
-        y
-      });
+    // Broadcast coordinate step to everyone in room
+    io.to(context.room.id).emit('draw_data', {
+      type: 'move',
+      x,
+      y
     });
   });
 
@@ -93,10 +89,8 @@ export function registerDrawingHandler(io, socket) {
       currentStroke = null;
     }
 
-    context.room.players.forEach(p => {
-      io.to(p.socketId).emit('draw_data', {
-        type: 'end'
-      });
+    io.to(context.room.id).emit('draw_data', {
+      type: 'end'
     });
   });
 

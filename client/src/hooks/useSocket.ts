@@ -128,20 +128,62 @@ export function useSocket() {
     // Game lifecycle events
     function onGameState(data: GameStateData) {
       setGameState(data);
-      if (data.phase === 'DRAWING') {
+      if (data.phase === 'DRAWING' || data.phase === 'CHOOSING_WORD') {
         setRoundEndData(null);
       }
       if (data.phase === 'GAME_OVER') {
         setWordOptions([]);
       }
+      if (data.drawerId) {
+        setRoom((prev) => (prev ? { ...prev, currentDrawerId: data.drawerId } : prev));
+        setCurrentUser((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            isDrawing: prev.id === data.drawerId
+          };
+        });
+      }
     }
 
     function onRoundStart(data: RoundStartData) {
       setRoundEndData(null);
+      // Immediately reset previous drawing canvas
+      setRemoteClearTrigger((prev) => prev + 1);
+
       if (data.wordOptions && data.wordOptions.length > 0) {
         setWordOptions(data.wordOptions);
       } else {
         setWordOptions([]);
+      }
+
+      if (data.drawerId) {
+        setRoom((prev) => {
+          if (!prev) return null;
+          const players = data.players || prev.players.map((p) => ({
+            ...p,
+            hasGuessed: false,
+            roundScore: 0,
+            isDrawing: p.id === data.drawerId
+          }));
+          return {
+            ...prev,
+            currentDrawerId: data.drawerId,
+            currentRound: data.round,
+            totalRounds: data.totalRounds,
+            players
+          };
+        });
+
+        setCurrentUser((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            hasGuessed: false,
+            roundScore: 0,
+            isDrawing: prev.id === data.drawerId
+          };
+        });
       }
     }
 
@@ -155,6 +197,12 @@ export function useSocket() {
             ...prev,
             players: data.scores
           };
+        });
+
+        setCurrentUser((prev) => {
+          if (!prev) return null;
+          const me = data.scores.find((p) => p.id === prev.id);
+          return me ? { ...prev, ...me } : prev;
         });
       }
     }
@@ -175,6 +223,46 @@ export function useSocket() {
           };
         });
       }
+
+      setCurrentUser((prev) => {
+        if (!prev) return null;
+        if (prev.id === data.playerId && data.correct) {
+          return {
+            ...prev,
+            hasGuessed: true,
+            score: prev.score + (data.points || 0)
+          };
+        }
+        return prev;
+      });
+    }
+
+    function onLeaderboardUpdate(data: { players: Player[] }) {
+      if (data.players) {
+        setRoom((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            players: data.players
+          };
+        });
+
+        setCurrentUser((prev) => {
+          if (!prev) return null;
+          const me = data.players.find((p) => p.id === prev.id);
+          return me ? { ...prev, ...me } : prev;
+        });
+      }
+    }
+
+    function onTimerTick(data: { timeLeft: number }) {
+      setGameState((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          timeLeft: data.timeLeft
+        };
+      });
     }
 
     function onChatMessage(data: { playerId?: string; playerName?: string; text: string; system?: boolean; alreadyGuessed?: boolean }) {
@@ -217,6 +305,8 @@ export function useSocket() {
     socket.on('round_end', onRoundEnd);
     socket.on('game_over', onGameOver);
     socket.on('guess_result', onGuessResult);
+    socket.on('leaderboard_update', onLeaderboardUpdate);
+    socket.on('timer_tick', onTimerTick);
     socket.on('chat_message', onChatMessage);
     socket.on('draw_data', onDrawData);
     socket.on('canvas_clear', onCanvasClear);
@@ -235,6 +325,8 @@ export function useSocket() {
       socket.off('round_end', onRoundEnd);
       socket.off('game_over', onGameOver);
       socket.off('guess_result', onGuessResult);
+      socket.off('leaderboard_update', onLeaderboardUpdate);
+      socket.off('timer_tick', onTimerTick);
       socket.off('chat_message', onChatMessage);
       socket.off('draw_data', onDrawData);
       socket.off('canvas_clear', onCanvasClear);

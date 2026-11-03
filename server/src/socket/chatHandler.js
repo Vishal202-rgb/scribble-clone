@@ -7,10 +7,9 @@ import { roomStore } from '../utils/roomStore.js';
  */
 export function registerChatHandler(io, socket) {
   /**
-   * Handle player guess
-   * Payload: { text: string }
+   * Unified message and guess processor
    */
-  socket.on('guess', (payload = {}, callback) => {
+  function handleIncomingMessage(rawText, callback) {
     try {
       const mapping = roomStore.getSocketMapping(socket.id);
       if (!mapping) return;
@@ -21,40 +20,42 @@ export function registerChatHandler(io, socket) {
       const player = room.getPlayer(mapping.playerId);
       if (!player) return;
 
-      const rawText = (payload.text || '').trim();
-      if (!rawText) return;
+      const text = String(rawText || '').trim();
+      if (!text) return;
 
-      // If game is not currently running or not in DRAWING phase, treat as normal chat
-      if (!room.game || room.game.phase !== 'DRAWING') {
+      const game = room.game;
+
+      // 1. If no game or not in DRAWING phase: regular chat
+      if (!game || game.phase !== 'DRAWING') {
         io.to(room.id).emit('chat_message', {
           playerId: player.id,
           playerName: player.name,
-          text: rawText
+          text
         });
         if (typeof callback === 'function') callback({ success: true, isGuess: false });
         return;
       }
 
-      // If drawer attempts to guess
-      if (player.id === room.game.currentDrawerId) {
-        socket.emit('chat_message', {
-          system: true,
-          text: 'You are the drawer, you cannot guess!',
-          playerId: player.id
+      // 2. If sender is the current drawer: cannot guess, but can chat
+      if (player.id === game.currentDrawerId) {
+        io.to(room.id).emit('chat_message', {
+          playerId: player.id,
+          playerName: player.name,
+          text,
+          isDrawer: true
         });
-        if (typeof callback === 'function') callback({ success: false, reason: 'Drawer cannot guess' });
+        if (typeof callback === 'function') callback({ success: true, isDrawer: true });
         return;
       }
 
-      // If player already guessed correctly this round
+      // 3. If player already guessed correctly this round: chat only with other guessers + drawer
       if (player.hasGuessed) {
-        // Send message only to other players who have guessed and the drawer
         room.players.forEach(p => {
-          if (p.hasGuessed || p.id === room.game.currentDrawerId) {
+          if (p.hasGuessed || p.id === game.currentDrawerId) {
             io.to(p.socketId).emit('chat_message', {
               playerId: player.id,
               playerName: player.name,
-              text: rawText,
+              text,
               alreadyGuessed: true
             });
           }
@@ -63,28 +64,36 @@ export function registerChatHandler(io, socket) {
         return;
       }
 
-      // Process guess through game engine
-      const result = room.game.handleGuess(player, rawText);
+      // 4. Guesser in DRAWING phase: evaluate guess
+      const result = game.handleGuess(player, text);
 
       if (result.correct) {
+        // Correct guess! Points awarded and broadcasted by game.handleGuess
         if (typeof callback === 'function') {
           callback({ success: true, correct: true, points: result.points });
         }
       } else {
-        // Broadcast incorrect guess as standard chat to all players
+        // Incorrect guess: broadcast to all as regular chat
         io.to(room.id).emit('chat_message', {
           playerId: player.id,
           playerName: player.name,
-          text: rawText
+          text
         });
-
         if (typeof callback === 'function') {
           callback({ success: true, correct: false });
         }
       }
     } catch (err) {
-      console.error('Error handling guess:', err);
+      console.error('Error handling player message:', err);
     }
+  }
+
+  /**
+   * Handle player guess
+   * Payload: { text: string }
+   */
+  socket.on('guess', (payload = {}, callback) => {
+    handleIncomingMessage(payload.text, callback);
   });
 
   /**
@@ -92,31 +101,6 @@ export function registerChatHandler(io, socket) {
    * Payload: { text: string }
    */
   socket.on('chat', (payload = {}, callback) => {
-    try {
-      const mapping = roomStore.getSocketMapping(socket.id);
-      if (!mapping) return;
-
-      const room = roomStore.getRoom(mapping.roomId);
-      if (!room) return;
-
-      const player = room.getPlayer(mapping.playerId);
-      if (!player) return;
-
-      const text = (payload.text || '').trim();
-      if (!text) return;
-
-      // Broadcast chat message
-      io.to(room.id).emit('chat_message', {
-        playerId: player.id,
-        playerName: player.name,
-        text
-      });
-
-      if (typeof callback === 'function') {
-        callback({ success: true });
-      }
-    } catch (err) {
-      console.error('Error handling chat:', err);
-    }
+    handleIncomingMessage(payload.text, callback);
   });
 }

@@ -1,4 +1,4 @@
-import { getRandomWords, maskWord, generateHintSchedule } from '../words/wordService.js';
+import { getRandomWords, maskWord, generateHintSchedule, isWordMatch } from '../words/wordService.js';
 
 export class Game {
   /**
@@ -69,7 +69,17 @@ export class Game {
     this.currentRound = 1;
     this.currentDrawerIndex = 0;
 
+    // Broadcast reset leaderboard immediately
+    this.broadcastLeaderboard();
+
     this.startWordSelection();
+  }
+
+  broadcastLeaderboard() {
+    const leaderboard = this.getLeaderboard();
+    this.io.to(this.room.id).emit('leaderboard_update', {
+      players: leaderboard
+    });
   }
 
   startWordSelection() {
@@ -108,6 +118,9 @@ export class Game {
     this.guessedCount = 0;
     this.revealedHintIndices.clear();
 
+    // 1. Immediately clear canvas for all players so old drawing disappears
+    this.io.to(this.room.id).emit('canvas_clear');
+
     const wordCount = Math.min(Math.max(this.room.settings.wordCount || 3, 1), 5);
     this.wordOptions = getRandomWords(wordCount);
 
@@ -115,18 +128,22 @@ export class Game {
 
     console.log(`[Round ${this.currentRound}/${this.totalRounds}] Word selection for ${drawer.name} (${drawer.id})`);
 
-    // Emit round_start & game_state
-    // Drawer receives wordOptions
+    const leaderboard = this.getLeaderboard();
+
+    // Broadcast updated leaderboard with reset guess states to all players
+    this.broadcastLeaderboard();
+
+    // Emit round_start: drawer receives wordOptions, non-drawers receive round details
     this.io.to(drawer.socketId).emit('round_start', {
       drawerId: drawer.id,
       drawerName: drawer.name,
       wordOptions: this.wordOptions,
       drawTime: this.drawTime,
       round: this.currentRound,
-      totalRounds: this.totalRounds
+      totalRounds: this.totalRounds,
+      players: leaderboard
     });
 
-    // Other players do NOT receive wordOptions
     this.room.players.forEach(p => {
       if (p.id !== drawer.id) {
         this.io.to(p.socketId).emit('round_start', {
@@ -134,16 +151,28 @@ export class Game {
           drawerName: drawer.name,
           drawTime: this.drawTime,
           round: this.currentRound,
-          totalRounds: this.totalRounds
+          totalRounds: this.totalRounds,
+          players: leaderboard
         });
       }
     });
 
-    this.broadcastGameState();
+    // Broadcast CHOOSING_WORD game_state to entire room
+    this.io.to(this.room.id).emit('game_state', {
+      phase: 'CHOOSING_WORD',
+      round: this.currentRound,
+      totalRounds: this.totalRounds,
+      drawerId: this.currentDrawerId,
+      drawerName: drawer.name,
+      word: '',
+      hints: '',
+      timeLeft: this.timeLeft
+    });
 
     // Choosing countdown
     this.timer = setInterval(() => {
       this.timeLeft--;
+      this.io.to(this.room.id).emit('timer_tick', { timeLeft: this.timeLeft });
       if (this.timeLeft <= 0) {
         this.clearTimer();
         // Auto select first word if drawer didn't choose in time
@@ -179,8 +208,23 @@ export class Game {
     // Clear canvas on all clients for new round
     this.io.to(this.room.id).emit('canvas_clear');
 
-    // Notify drawer with actual word
     const drawer = this.getCurrentDrawer();
+    const masked = maskWord(this.currentWord, this.revealedHintIndices);
+
+    // 1. Broadcast DRAWING state with masked hints to the ENTIRE room first
+    // This guarantees EVERY client updates their phase to DRAWING and drawerId synchronously
+    this.io.to(this.room.id).emit('game_state', {
+      phase: 'DRAWING',
+      round: this.currentRound,
+      totalRounds: this.totalRounds,
+      drawerId: this.currentDrawerId,
+      drawerName: drawer ? drawer.name : '',
+      word: '',
+      hints: masked,
+      timeLeft: this.timeLeft
+    });
+
+    // 2. Deliver unmasked word privately to the drawer
     if (drawer) {
       this.io.to(drawer.socketId).emit('game_state', {
         phase: 'DRAWING',
@@ -194,14 +238,10 @@ export class Game {
       });
     }
 
-    // Broadcast masked word blanks to other players
-    this.broadcastMaskedGameState();
-
     // Calculate hint reveal timestamps
-    // e.g. hint 1 at 60% time left, hint 2 at 30% time left
     const hintTimes = [];
     if (this.hintSchedule.length === 1) {
-      hintTimes.push(Math.floor(this.drawTime * 0.4)); // halfway
+      hintTimes.push(Math.floor(this.drawTime * 0.4));
     } else if (this.hintSchedule.length >= 2) {
       hintTimes.push(Math.floor(this.drawTime * 0.6));
       hintTimes.push(Math.floor(this.drawTime * 0.3));
@@ -210,6 +250,7 @@ export class Game {
     // Drawing timer loop
     this.timer = setInterval(() => {
       this.timeLeft--;
+      this.io.to(this.room.id).emit('timer_tick', { timeLeft: this.timeLeft });
 
       // Check hint unlocks
       if (this.hintSchedule.length > 0 && hintTimes.length > 0) {
@@ -238,6 +279,7 @@ export class Game {
       totalRounds: this.totalRounds,
       drawerId: this.currentDrawerId,
       drawerName: drawer ? drawer.name : '',
+      word: '',
       hints: this.phase === 'DRAWING' ? maskWord(this.currentWord, this.revealedHintIndices) : '',
       timeLeft: this.timeLeft
     });
@@ -255,6 +297,7 @@ export class Game {
           totalRounds: this.totalRounds,
           drawerId: this.currentDrawerId,
           drawerName: drawer ? drawer.name : '',
+          word: '',
           hints: masked,
           timeLeft: this.timeLeft
         });
@@ -272,25 +315,25 @@ export class Game {
     }
 
     if (player.hasGuessed) {
-      // Player already guessed correctly: treat input as hidden chat or allow chat
       return { success: true, alreadyGuessed: true };
     }
 
-    const guess = (rawText || '').trim().toLowerCase();
-    const target = (this.currentWord || '').trim().toLowerCase();
+    const text = String(rawText || '').trim();
+    if (!text) return { success: false, reason: 'Empty guess' };
 
-    if (!guess) return { success: false, reason: 'Empty guess' };
+    // Case-insensitive, whitespace-trimmed, punctuation-normalized comparison
+    const isCorrect = isWordMatch(text, this.currentWord);
 
-    if (guess === target) {
+    if (isCorrect) {
       player.hasGuessed = true;
       this.guessedCount++;
       player.guessOrder = this.guessedCount;
 
-      // Calculate score based on time remaining and guess order
-      // Base: 100, Time component: up to 350, First guess bonus: +50
+      // Calculate score based on remaining time and guess order
+      // Base: 100, Time component: up to 350, First bonus: +50, Second bonus: +25
       const timeRatio = Math.max(0, this.timeLeft / (this.drawTime || 80));
       const timeBonus = Math.round(timeRatio * 350);
-      const firstBonus = this.guessedCount === 1 ? 50 : 0;
+      const firstBonus = this.guessedCount === 1 ? 50 : (this.guessedCount === 2 ? 25 : 0);
       const points = 100 + timeBonus + firstBonus;
 
       player.addScore(points);
@@ -301,21 +344,32 @@ export class Game {
         drawer.addScore(50);
       }
 
-      // Notify guesser and broadcast guess_result
+      const updatedLeaderboard = this.getLeaderboard();
+
+      // 1. Broadcast guess_result to all players in the room
       this.io.to(this.room.id).emit('guess_result', {
         correct: true,
         playerId: player.id,
         playerName: player.name,
         points,
-        leaderboard: this.getLeaderboard()
+        leaderboard: updatedLeaderboard
       });
 
-      // Broadcast system celebration in chat
+      // 2. Broadcast leaderboard_update to guarantee all screens update
+      this.io.to(this.room.id).emit('leaderboard_update', {
+        players: updatedLeaderboard
+      });
+
+      // 3. Broadcast system celebration message in chat
       this.io.to(this.room.id).emit('chat_message', {
         system: true,
         text: `${player.name} guessed the word! (+${points} pts)`,
-        playerId: player.id
+        playerId: player.id,
+        points,
+        isCorrectGuess: true
       });
+
+      console.log(`[Correct Guess] ${player.name} guessed "${this.currentWord}" (+${points} pts). Drawer (${drawer?.name}) awarded +50 pts.`);
 
       // Check if all non-drawers have guessed
       const nonDrawersCount = this.room.players.size - 1;
@@ -328,10 +382,10 @@ export class Game {
     }
 
     // Check if close guess (Levenshtein distance == 1)
-    if (this.isCloseGuess(guess, target)) {
+    if (this.isCloseGuess(text.toLowerCase().trim(), this.currentWord.toLowerCase().trim())) {
       this.io.to(player.socketId).emit('chat_message', {
         system: true,
-        text: `"${rawText}" is very close!`,
+        text: `"${text}" is very close!`,
         playerId: player.id
       });
     }
@@ -372,6 +426,10 @@ export class Game {
       scores: leaderboard,
       nextDrawer,
       reason
+    });
+
+    this.io.to(this.room.id).emit('leaderboard_update', {
+      players: leaderboard
     });
 
     this.io.to(this.room.id).emit('game_state', {
@@ -429,6 +487,10 @@ export class Game {
       leaderboard
     });
 
+    this.io.to(this.room.id).emit('leaderboard_update', {
+      players: leaderboard
+    });
+
     this.io.to(this.room.id).emit('game_state', {
       phase: 'GAME_OVER',
       round: this.currentRound,
@@ -440,7 +502,6 @@ export class Game {
   }
 
   handlePlayerDeparture(playerId) {
-    // If the leaving player is the current drawer during active round
     if (playerId === this.currentDrawerId) {
       if (this.phase === 'DRAWING' || this.phase === 'CHOOSING_WORD') {
         console.log(`[Drawer Left] Advancing round in room ${this.room.id}`);
@@ -448,10 +509,8 @@ export class Game {
       }
     }
 
-    // Remove from drawer order
     this.drawerOrder = this.drawerOrder.filter(id => id !== playerId);
 
-    // If remaining active players < 2, stop game and reset to lobby
     if (this.room.players.size < 2 && (this.phase === 'DRAWING' || this.phase === 'CHOOSING_WORD' || this.phase === 'ROUND_END')) {
       this.clearTimer();
       this.phase = 'LOBBY';

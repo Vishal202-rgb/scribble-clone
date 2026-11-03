@@ -74,3 +74,48 @@ export function generateHintSchedule(word, maxHints = 2) {
   const hintLimit = Math.min(maxHints, Math.floor(word.length * 0.45));
   return shuffled.slice(0, Math.max(1, hintLimit));
 }
+
+/**
+ * Normalizes a word for comparison by removing punctuation and extra spaces
+ * @param {string} str
+ * @returns {string}
+ */
+export function normalizeWord(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()?'"!\\]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+/**
+ * Robust word matching:
+ * 1. Direct trimmed case-insensitive comparison
+ * 2. Normalized punctuation-stripped comparison
+ * 3. Compact comparison (ignoring spaces/hyphens for compound words like "ice cream" vs "icecream")
+ * @param {string} guess
+ * @param {string} target
+ * @returns {boolean}
+ */
+export function isWordMatch(guess, target) {
+  if (!guess || !target) return false;
+
+  const rawG = String(guess).trim().toLowerCase();
+  const rawT = String(target).trim().toLowerCase();
+
+  // 1. Direct exact match
+  if (rawG === rawT) return true;
+
+  // 2. Normalized comparison
+  const normG = normalizeWord(rawG);
+  const normT = normalizeWord(rawT);
+  if (normG && normG === normT) return true;
+
+  // 3. Compact comparison (strip all spaces for compound words)
+  const compactG = normG.replace(/\s+/g, '');
+  const compactT = normT.replace(/\s+/g, '');
+  if (compactG && compactG === compactT) return true;
+
+  return false;
+}
