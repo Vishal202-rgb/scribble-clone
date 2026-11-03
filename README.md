@@ -5,8 +5,8 @@ A full-stack, real-time multiplayer drawing and guessing game built with React, 
 ---
 
 ## Live Demo & Deployment
-- **Frontend URL (Vercel)**: `https://your-skribbl-clone.vercel.app` *(configured for instant deployment)*
-- **Backend WebSocket URL (Render / Railway)**: `https://your-skribbl-clone.onrender.com`
+- **Frontend URL (Vercel)**: `https://scribble-clone-zeta.vercel.app` 
+- **Backend WebSocket URL (Render / Railway)**: `https://scribble-clone-server-ov6l.onrender.com`
 
 ---
 
