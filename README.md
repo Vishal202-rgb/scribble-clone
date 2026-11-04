@@ -2,6 +2,7 @@
 
 A full-stack, real-time multiplayer drawing and guessing game built with React, TypeScript, Vite, Node.js, Express, and Socket.IO. Designed with a strictly monochromatic, minimalist aesthetic.
 
+![image alt](https://github.com/Vishal202-rgb/scribble-clone/blob/489e68b6083383a2e5d634c6c25ae9a12563e172/client/public/homeScreen.png)
 ---
 
 ## Live Demo & Deployment
@@ -150,31 +151,6 @@ The Vite development server will start on `http://localhost:3000`.
 3. Open `http://localhost:3000` in Tab 2 and Tab 3, enter nicknames (e.g. `Bob`, `Charlie`), and join using the room code.
 4. Alice (Host) clicks **Start Game**.
 5. Drawer chooses a word and draws on canvas; guessers see masked blanks and type guesses into chat.
-
----
-
-## Deployment Guide
-
-### Deploying Backend to Render or Railway
-1. Push repository to GitHub.
-2. In Render / Railway, create a new **Web Service**.
-3. Set the Root Directory to `server`.
-4. Build Command: `npm install`
-5. Start Command: `npm start`
-6. Add Environment Variables:
-   - `PORT`: `5000` (or provided automatically by the platform)
-   - `CLIENT_ORIGIN`: Your frontend URL (or `*`)
-
-### Deploying Frontend to Vercel
-1. Import repository into Vercel.
-2. Set Root Directory to `client`.
-3. Framework Preset: **Vite**
-4. Build Command: `npm run build`
-5. Output Directory: `dist`
-6. Add Environment Variable:
-   - `VITE_BACKEND_URL`: URL of your deployed backend (e.g. `https://your-backend.onrender.com`)
-
----
 
 ## Testing & Verification
 The application has been verified against:
