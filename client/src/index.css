@@ -45,3 +45,39 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* CSS Simulated Landscape Fallback for devices without orientation lock */
+.simulated-landscape {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100dvh !important;
+  height: 100dvw !important;
+  transform-origin: top left !important;
+  transform: rotate(90deg) translateY(-100%) !important;
+  overflow: hidden !important;
+  z-index: 50 !important;
+  background-color: #EEF5FC;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile landscape helpers to maximize game area */
+@media (max-width: 1023px) and (orientation: landscape) {
+  .hide-on-mobile-landscape {
+    display: none !important;
+  }
+  .mobile-landscape-fill {
+    padding: 0 !important;
+    height: 100dvh !important;
+    max-width: 100% !important;
+  }
+}
+

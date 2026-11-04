@@ -84,7 +84,7 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen skribbl-doodle-bg text-slate-800 flex flex-col justify-between selection:bg-skribbl-blue selection:text-white font-sans">
       {/* Top Navbar */}
-      <header className="bg-white/90 backdrop-blur-md border-b-2 border-skribbl-border sticky top-0 z-30 shadow-xs">
+      <header className={`bg-white/90 backdrop-blur-md border-b-2 border-skribbl-border sticky top-0 z-30 shadow-xs ${isInGame ? 'hide-on-mobile-landscape' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div
             onClick={() => {
@@ -121,7 +121,7 @@ export const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center">
+      <main className={`flex-1 max-w-7xl w-full mx-auto flex items-center justify-center ${isInGame ? 'p-1 sm:p-4 md:p-6 mobile-landscape-fill' : 'p-4 sm:p-6'}`}>
         {room ? (
           isInGame ? (
             <GamePage
@@ -193,7 +193,7 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t-2 border-skribbl-border bg-white py-3.5 text-center text-xs text-slate-500 font-fun">
+      <footer className={`border-t-2 border-skribbl-border bg-white py-3.5 text-center text-xs text-slate-500 font-fun ${isInGame ? 'hide-on-mobile-landscape' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span className="font-bold text-slate-600">Skribbl Clone &mdash; Real-Time Multiplayer Drawing &amp; Guessing</span>
           <span className="text-slate-400">Play with friends in custom rooms</span>

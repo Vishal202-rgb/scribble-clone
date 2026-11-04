@@ -21,6 +21,8 @@ interface GameCanvasProps {
   onDrawEnd?: () => void;
   onClear?: () => void;
   onUndo?: () => void;
+  className?: string;
+  isLandscape?: boolean;
 }
 
 // 14 Vibrant, Distinct Colors
@@ -139,7 +141,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   onDrawMove: _onDrawMove,
   onDrawEnd: _onDrawEnd,
   onClear,
-  onUndo
+  onUndo,
+  className = '',
+  isLandscape = false
 }) => {
   // Layered dual-canvas references
   const mainCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -720,9 +724,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   };
 
   return (
-    <div className="flex flex-col bg-white border-2 border-skribbl-border rounded-3xl shadow-skribbl overflow-hidden select-none">
+    <div className={`flex flex-col bg-white border-2 border-skribbl-border rounded-3xl shadow-skribbl overflow-hidden select-none ${className}`}>
       {/* Canvas Header / Status Bar */}
-      <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between text-xs bg-slate-50/70">
+      <div className={`${isLandscape ? 'px-3 py-1.5' : 'px-4 py-2.5'} border-b border-slate-100 flex items-center justify-between text-xs bg-slate-50/70 shrink-0`}>
         <div className="flex items-center space-x-2">
           {isDrawer ? (
             <span className="font-fun font-bold text-emerald-700 uppercase tracking-wider flex items-center space-x-1.5 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
@@ -744,8 +748,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       </div>
 
       {/* Canvas Area with Stacked Dual Canvases (Main + Live Preview) */}
-      <div className="relative w-full aspect-[4/3] bg-white flex items-center justify-center p-2 sm:p-2.5">
-        <div className="relative w-full h-full rounded-2xl border-2 border-slate-200 overflow-hidden bg-white shadow-inner">
+      <div className={`relative w-full aspect-[4/3] bg-white flex items-center justify-center ${isLandscape ? 'p-1' : 'p-2 sm:p-2.5'} touch-none select-none`}>
+        <div className="relative w-full h-full rounded-2xl border-2 border-slate-200 overflow-hidden bg-white shadow-inner touch-none select-none">
           {/* Main Permanent Canvas */}
           <canvas
             ref={mainCanvasRef}
@@ -774,7 +778,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       {/* Drawer Controls Toolbar */}
       {isDrawer && (
-        <div className="p-3 sm:p-3.5 border-t-2 border-slate-200 bg-slate-50/90 flex flex-col gap-3 rounded-b-3xl">
+        <div className={`${isLandscape ? 'p-2 gap-2' : 'p-3 sm:p-3.5 gap-3'} border-t-2 border-slate-200 bg-slate-50/90 flex flex-col rounded-b-3xl shrink-0`}>
           {/* Top Row: Tools, Sizes & Actions */}
           <div className="flex flex-wrap items-center justify-between gap-2.5">
             {/* Tool Selectors */}

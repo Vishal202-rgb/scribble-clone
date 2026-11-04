@@ -10,6 +10,8 @@ interface ChatProps {
   isDrawingPhase: boolean;
   onSendGuess: (text: string) => void;
   onSendChat: (text: string) => void;
+  className?: string;
+  isLandscape?: boolean;
 }
 
 export const Chat: React.FC<ChatProps> = ({
@@ -19,13 +21,17 @@ export const Chat: React.FC<ChatProps> = ({
   hasGuessed,
   isDrawingPhase,
   onSendGuess,
-  onSendChat
+  onSendChat,
+  className = '',
+  isLandscape = false
 }) => {
   const [inputText, setInputText] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -54,25 +60,32 @@ export const Chat: React.FC<ChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-2 border-skribbl-border rounded-3xl shadow-skribbl overflow-hidden">
+    <div className={`flex flex-col h-full bg-white border-2 border-skribbl-border rounded-3xl shadow-skribbl overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+      <div className={`${isLandscape ? 'px-3 py-2' : 'px-4 py-3.5'} border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0`}>
         <div className="flex items-center space-x-2">
-          <MessageSquare size={16} className="text-skribbl-blue" />
+          <MessageSquare size={isLandscape ? 14 : 16} className="text-skribbl-blue" />
           <h3 className="text-xs font-fun font-bold uppercase tracking-wider text-slate-700">
             Guesses &amp; Chat
           </h3>
         </div>
         {hasGuessed && (
-          <div className="flex items-center space-x-1 text-xs font-fun font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 animate-bounce">
-            <CheckCircle2 size={13} />
+          <div className="flex items-center space-x-1 text-xs font-fun font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 animate-bounce">
+            <CheckCircle2 size={12} />
             <span className="text-[10px] uppercase">Guessed!</span>
           </div>
         )}
       </div>
 
       {/* Messages Stream */}
-      <div className="flex-1 p-3 overflow-y-auto space-y-2.5 min-h-[260px] max-h-[380px] text-xs">
+      <div
+        ref={messagesContainerRef}
+        className={`flex-1 overflow-y-auto overscroll-contain space-y-2 text-xs ${
+          isLandscape
+            ? 'p-2 min-h-0'
+            : 'p-3 min-h-[200px] max-h-[380px] lg:max-h-none'
+        }`}
+      >
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs italic py-8 space-y-1">
             <Sparkles size={20} className="text-slate-300" />
@@ -152,11 +165,10 @@ export const Chat: React.FC<ChatProps> = ({
             );
           })
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center space-x-2">
+      <form onSubmit={handleSubmit} className={`${isLandscape ? 'p-2' : 'p-3'} border-t border-slate-100 bg-slate-50/50 flex items-center space-x-2 shrink-0`}>
         <input
           type="text"
           maxLength={100}
@@ -164,12 +176,12 @@ export const Chat: React.FC<ChatProps> = ({
           onChange={(e) => setInputText(e.target.value)}
           placeholder={getPlaceholder()}
           disabled={isDrawingPhase && isDrawer}
-          className="flex-1 px-4 py-2.5 text-xs font-semibold rounded-2xl border-2 border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-skribbl-blue focus:ring-2 focus:ring-sky-100 transition-all disabled:opacity-50 disabled:bg-slate-100 disabled:cursor-not-allowed placeholder:text-slate-400 placeholder:font-normal"
+          className={`flex-1 px-3 ${isLandscape ? 'py-1.5' : 'py-2.5'} text-xs font-semibold rounded-2xl border-2 border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-skribbl-blue focus:ring-2 focus:ring-sky-100 transition-all disabled:opacity-50 disabled:bg-slate-100 disabled:cursor-not-allowed placeholder:text-slate-400 placeholder:font-normal`}
         />
         <button
           type="submit"
           disabled={!inputText.trim() || (isDrawingPhase && isDrawer)}
-          className="p-2.5 rounded-2xl bg-skribbl-blue hover:bg-skribbl-blueDark text-white disabled:opacity-40 transition-all cursor-pointer shadow-xs active:scale-95"
+          className={`${isLandscape ? 'p-2' : 'p-2.5'} rounded-2xl bg-skribbl-blue hover:bg-skribbl-blueDark text-white disabled:opacity-40 transition-all cursor-pointer shadow-xs active:scale-95 shrink-0`}
           title="Send Guess or Message"
         >
           <Send size={15} />
