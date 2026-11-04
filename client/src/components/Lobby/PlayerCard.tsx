@@ -1,6 +1,7 @@
 import React from 'react';
-import { Crown, User } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import { Player } from '../../types';
+import { Avatar, getSavedAvatar } from '../Avatar';
 
 interface PlayerCardProps {
   player: Player;
@@ -8,56 +9,56 @@ interface PlayerCardProps {
 }
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player, isSelf }) => {
+  const savedAvatar = isSelf ? getSavedAvatar() : undefined;
+
   return (
     <div
-      className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+      className={`flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all ${
         isSelf
-          ? 'bg-mono-white border-mono-text shadow-sm'
-          : 'bg-mono-light border-mono-border hover:border-mono-secondary'
+          ? 'bg-sky-50/70 border-skribbl-blue shadow-xs'
+          : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
       }`}
     >
       <div className="flex items-center space-x-3 min-w-0">
-        <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border ${
-            player.isHost
-              ? 'bg-mono-text text-mono-white border-mono-text'
-              : 'bg-mono-white text-mono-text border-mono-border'
-          }`}
-        >
-          {player.name.charAt(0).toUpperCase()}
-        </div>
+        {/* Colorful Skribbl Avatar */}
+        <Avatar
+          config={savedAvatar}
+          seed={player.id || player.name}
+          size="md"
+          animate
+        />
+
         <div className="min-w-0">
           <div className="flex items-center space-x-1.5">
-            <span className="font-semibold text-mono-text text-sm truncate max-w-[140px]">
+            <span className="font-fun font-bold text-slate-800 text-sm truncate max-w-[130px]">
               {player.name}
             </span>
             {isSelf && (
-              <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-mono-border text-mono-text font-medium">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-skribbl-blue font-fun">
                 You
               </span>
             )}
           </div>
-          <span className="text-xs text-mono-secondary">
-            {player.isHost ? 'Room Host' : 'Player'}
-          </span>
+          <div className="flex items-center space-x-1.5 text-xs text-slate-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>{player.isHost ? 'Room Leader' : 'Ready to draw'}</span>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center space-x-2 shrink-0">
-        {player.isHost ? (
+        {player.isHost && (
           <div
             title="Room Host"
-            className="flex items-center space-x-1 text-xs font-semibold px-2 py-1 rounded bg-mono-text text-mono-white"
+            className="flex items-center space-x-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-700 shadow-xs"
           >
-            <Crown size={12} className="stroke-[2.5]" />
-            <span className="text-[11px] uppercase tracking-wider">Host</span>
-          </div>
-        ) : (
-          <div className="text-mono-secondary p-1">
-            <User size={16} />
+            <Crown size={12} className="stroke-[2.5] fill-amber-500" />
+            <span className="text-[10px] uppercase tracking-wider font-fun">Host</span>
           </div>
         )}
       </div>
     </div>
   );
 };
+
+export default PlayerCard;

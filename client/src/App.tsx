@@ -82,34 +82,38 @@ export const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-mono-light text-mono-text flex flex-col justify-between selection:bg-mono-text selection:text-mono-white">
+    <div className="min-h-screen skribbl-doodle-bg text-slate-800 flex flex-col justify-between selection:bg-skribbl-blue selection:text-white font-sans">
       {/* Top Navbar */}
-      <header className="bg-mono-white border-b border-mono-border sticky top-0 z-30">
+      <header className="bg-white/90 backdrop-blur-md border-b-2 border-skribbl-border sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div
             onClick={() => {
               if (!room) setView('HOME');
             }}
-            className="flex items-center space-x-2 cursor-pointer select-none"
+            className="flex items-center space-x-1.5 cursor-pointer select-none group"
           >
-            <div className="w-7 h-7 rounded-lg bg-mono-text text-mono-white flex items-center justify-center font-black text-sm font-mono tracking-tighter">
-              S
+            <div className="flex items-center space-x-0.5 font-fun font-bold text-xl sm:text-2xl tracking-tight">
+              <span className="text-amber-500 group-hover:-translate-y-0.5 transition-transform">s</span>
+              <span className="text-sky-500 group-hover:translate-y-0.5 transition-transform">k</span>
+              <span className="text-rose-500 group-hover:-translate-y-0.5 transition-transform">r</span>
+              <span className="text-emerald-500 group-hover:translate-y-0.5 transition-transform">i</span>
+              <span className="text-violet-500 group-hover:-translate-y-0.5 transition-transform">b</span>
+              <span className="text-orange-500 group-hover:translate-y-0.5 transition-transform">b</span>
+              <span className="text-teal-500 group-hover:-translate-y-0.5 transition-transform">l</span>
+              <span className="text-slate-400 text-sm font-fun font-bold ml-0.5 self-end mb-0.5">.io</span>
             </div>
-            <span className="font-bold text-base tracking-tight text-mono-text font-mono">
-              SKRIBBL
-            </span>
           </div>
 
           <div className="flex items-center space-x-3 text-xs">
             {isConnected ? (
-              <div className="inline-flex items-center space-x-1.5 text-mono-secondary">
-                <span className="w-2 h-2 rounded-full bg-mono-text animate-pulse" />
-                <span className="font-mono text-[11px]">Online</span>
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-fun font-bold shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Online</span>
               </div>
             ) : (
-              <div className="inline-flex items-center space-x-1.5 text-mono-secondary">
-                <span className="w-2 h-2 rounded-full bg-mono-secondary" />
-                <span className="font-mono text-[11px]">Offline</span>
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-fun font-bold shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span>Connecting...</span>
               </div>
             )}
           </div>
@@ -189,10 +193,10 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-mono-border bg-mono-white py-3 text-center text-xs text-mono-secondary">
+      <footer className="border-t-2 border-skribbl-border bg-white py-3.5 text-center text-xs text-slate-500 font-fun">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Skribbl Clone &mdash; Real-Time Multiplayer Drawing &amp; Guessing</span>
-          <span className="font-mono text-[11px]">Strict Monochromatic Theme</span>
+          <span className="font-bold text-slate-600">Skribbl Clone &mdash; Real-Time Multiplayer Drawing &amp; Guessing</span>
+          <span className="text-slate-400">Play with friends in custom rooms</span>
         </div>
       </footer>
     </div>

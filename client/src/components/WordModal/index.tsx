@@ -15,35 +15,47 @@ export const WordModal: React.FC<WordModalProps> = ({
   if (!words || words.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-mono-text/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-mono-white border border-mono-text rounded-2xl p-6 shadow-2xl text-center space-y-5">
-        <div className="space-y-1">
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-mono-light border border-mono-border text-xs font-mono text-mono-secondary mb-1">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200 select-none">
+      <div className="w-full max-w-md bg-white border-4 border-skribbl-blue rounded-3xl p-6 sm:p-7 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-100 border border-amber-300 text-xs font-fun font-bold text-amber-800 mb-1">
             <Clock size={13} />
-            <span>{timeLeft}s to pick</span>
+            <span>{timeLeft}s to choose</span>
           </div>
-          <h2 className="text-2xl font-black text-mono-text tracking-tight">
-            Choose a Word to Draw
+          <h2 className="text-2xl font-fun font-bold text-slate-800 tracking-tight">
+            Choose a Word to Draw!
           </h2>
-          <p className="text-xs text-mono-secondary">
-            Select one of the words below. If time runs out, one will be chosen automatically.
+          <p className="text-xs font-medium text-slate-500">
+            Pick your secret word. Other players will try to guess it!
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-2.5">
-          {words.map((word) => (
-            <button
-              key={word}
-              type="button"
-              onClick={() => onSelectWord(word)}
-              className="w-full py-3.5 px-4 rounded-xl border border-mono-border bg-mono-light text-mono-text font-bold text-base hover:bg-mono-text hover:text-mono-white hover:border-mono-text transition-all duration-150 shadow-xs cursor-pointer capitalize flex items-center justify-center space-x-2"
-            >
-              <Sparkles size={16} />
-              <span>{word}</span>
-            </button>
-          ))}
+        {/* Word Choices Buttons */}
+        <div className="grid grid-cols-1 gap-3">
+          {words.map((word, idx) => {
+            const colors = [
+              'hover:bg-sky-500 hover:border-sky-600',
+              'hover:bg-emerald-500 hover:border-emerald-600',
+              'hover:bg-amber-500 hover:border-amber-600'
+            ];
+            const hoverColor = colors[idx % colors.length];
+
+            return (
+              <button
+                key={word}
+                type="button"
+                onClick={() => onSelectWord(word)}
+                className={`w-full py-4 px-5 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-800 font-fun font-bold text-lg ${hoverColor} hover:text-white hover:shadow-skribbl-btn active:translate-y-1 transition-all duration-150 cursor-pointer capitalize flex items-center justify-center space-x-2`}
+              >
+                <Sparkles size={18} />
+                <span>{word}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
+
+export default WordModal;

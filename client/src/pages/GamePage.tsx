@@ -15,7 +15,7 @@ import { Leaderboard } from '../components/Leaderboard';
 import { GameTimer } from '../components/GameTimer';
 import { WordModal } from '../components/WordModal';
 import { GameOverModal } from '../components/GameOver';
-import { LogOut, Sparkles } from 'lucide-react';
+import { LogOut, Sparkles, Hash } from 'lucide-react';
 
 interface GamePageProps {
   room: RoomData;
@@ -76,21 +76,24 @@ export const GamePage: React.FC<GamePageProps> = ({
   const drawerWord = gameState?.word;
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-4">
+    <div className="w-full max-w-7xl mx-auto space-y-4 py-1">
       {/* Top Header / Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-1">
         <div className="flex items-center space-x-2">
-          <span className="font-mono font-bold text-sm text-mono-text bg-mono-white border border-mono-border px-3 py-1 rounded-lg">
-            Room: {room.roomId}
-          </span>
+          <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-2xl bg-white border-2 border-skribbl-border shadow-xs">
+            <Hash size={15} className="text-skribbl-blue" />
+            <span className="font-mono font-black text-sm text-slate-800 tracking-wider">
+              {room.roomId}
+            </span>
+          </div>
         </div>
 
         <button
           onClick={onLeaveRoom}
           type="button"
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-mono-border bg-mono-white text-xs font-semibold text-mono-secondary hover:text-mono-text hover:border-mono-text transition-colors"
+          className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-2xl bg-white border-2 border-rose-200 text-xs font-fun font-bold text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer shadow-xs active:scale-95"
         >
-          <LogOut size={13} />
+          <LogOut size={14} />
           <span>Exit Game</span>
         </button>
       </div>
@@ -108,22 +111,22 @@ export const GamePage: React.FC<GamePageProps> = ({
 
       {/* Round End Notification Banner */}
       {roundEndData && (
-        <div className="p-4 rounded-xl border border-mono-text bg-mono-white text-mono-text shadow-md animate-in slide-in-from-top duration-300 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div className="space-y-0.5">
-            <div className="flex items-center justify-center sm:justify-start space-x-1.5 text-xs uppercase font-mono tracking-wider font-bold">
-              <Sparkles size={14} />
-              <span>Round Complete</span>
+        <div className="p-4 sm:p-5 rounded-3xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 text-slate-800 shadow-skribbl animate-in slide-in-from-top duration-300 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left select-none">
+          <div className="space-y-1">
+            <div className="flex items-center justify-center sm:justify-start space-x-1.5 text-xs uppercase font-fun tracking-wider font-bold text-amber-700">
+              <Sparkles size={15} />
+              <span>Round Complete!</span>
             </div>
-            <div className="text-base sm:text-lg font-bold">
-              The word was:{' '}
-              <span className="font-mono font-black uppercase underline underline-offset-4 tracking-wider">
+            <div className="text-base sm:text-lg font-fun font-bold text-slate-800">
+              The secret word was:{' '}
+              <span className="font-fun font-black uppercase text-skribbl-blue bg-white border border-sky-200 px-3 py-1 rounded-2xl tracking-wider shadow-xs ml-1">
                 {roundEndData.word}
               </span>
             </div>
           </div>
-          <div className="text-xs text-mono-secondary font-medium">
+          <div className="text-xs font-fun text-slate-600 bg-white/80 border border-amber-200 px-3 py-1.5 rounded-2xl">
             Next Drawer:{' '}
-            <strong className="text-mono-text">{roundEndData.nextDrawer}</strong>
+            <strong className="text-slate-900 font-bold">{roundEndData.nextDrawer}</strong>
           </div>
         </div>
       )}
@@ -190,3 +193,5 @@ export const GamePage: React.FC<GamePageProps> = ({
     </div>
   );
 };
+
+export default GamePage;

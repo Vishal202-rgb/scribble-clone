@@ -42,10 +42,10 @@ export const PALETTE_COLORS = [
 ];
 
 export const BRUSH_SIZES = [
-  { label: 'S', size: 3 },
-  { label: 'M', size: 7 },
-  { label: 'L', size: 14 },
-  { label: 'XL', size: 26 }
+  { label: 'S', size: 3, fullName: 'Small' },
+  { label: 'M', size: 7, fullName: 'Medium' },
+  { label: 'L', size: 14, fullName: 'Large' },
+  { label: 'XL', size: 26, fullName: 'Extra Large' }
 ];
 
 // Fixed logical internal canvas space (all coordinates normalized to 0..1 relative to this)
@@ -720,36 +720,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   };
 
   return (
-    <div className="flex flex-col bg-mono-white border border-mono-border rounded-xl shadow-sm overflow-hidden select-none">
+    <div className="flex flex-col bg-white border-2 border-skribbl-border rounded-3xl shadow-skribbl overflow-hidden select-none">
       {/* Canvas Header / Status Bar */}
-      <div className="px-4 py-2 border-b border-mono-border flex items-center justify-between text-xs bg-mono-light">
+      <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between text-xs bg-slate-50/70">
         <div className="flex items-center space-x-2">
           {isDrawer ? (
-            <span className="font-bold text-mono-text uppercase tracking-wider flex items-center space-x-1.5">
-              <span className="w-2 h-2 rounded-full bg-mono-text animate-pulse" />
+            <span className="font-fun font-bold text-emerald-700 uppercase tracking-wider flex items-center space-x-1.5 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>You are drawing</span>
             </span>
           ) : (
-            <span className="text-mono-secondary flex items-center space-x-1.5">
+            <span className="text-slate-500 flex items-center space-x-1.5 font-fun text-xs">
               <span>Watching</span>
-              <strong className="text-mono-text font-semibold">{drawerName}</strong>
+              <strong className="text-slate-800 font-bold bg-slate-100 px-2 py-0.5 rounded-full">{drawerName}</strong>
               <span>draw</span>
             </span>
           )}
         </div>
 
-        <span className="text-[11px] font-mono text-mono-secondary">
-          {LOGICAL_WIDTH} &times; {LOGICAL_HEIGHT} px (Normalized)
+        <span className="text-[11px] font-fun font-semibold text-slate-400">
+          Canvas &bull; 1000 &times; 750
         </span>
       </div>
 
       {/* Canvas Area with Stacked Dual Canvases (Main + Live Preview) */}
-      <div className="relative w-full aspect-[4/3] bg-mono-white flex items-center justify-center p-2">
-        <div className="relative w-full h-full rounded border border-mono-border overflow-hidden bg-mono-white">
+      <div className="relative w-full aspect-[4/3] bg-white flex items-center justify-center p-2 sm:p-2.5">
+        <div className="relative w-full h-full rounded-2xl border-2 border-slate-200 overflow-hidden bg-white shadow-inner">
           {/* Main Permanent Canvas */}
           <canvas
             ref={mainCanvasRef}
-            className="absolute inset-0 w-full h-full block bg-mono-white"
+            className="absolute inset-0 w-full h-full block bg-white"
           />
 
           {/* Interactive Preview Overlay Canvas */}
@@ -766,153 +766,156 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         </div>
 
         {!isDrawer && (
-          <div className="absolute top-4 left-4 pointer-events-none px-2.5 py-1 rounded-md bg-mono-white/90 border border-mono-border text-[11px] font-medium text-mono-secondary backdrop-blur-sm shadow-xs">
-            Drawing locked &mdash; Guesser mode
+          <div className="absolute top-5 left-5 pointer-events-none px-3 py-1.5 rounded-xl bg-white/90 border border-slate-200 text-xs font-fun font-bold text-slate-500 backdrop-blur-xs shadow-xs">
+            🔒 Guesser Mode &mdash; Drawing locked
           </div>
         )}
       </div>
 
       {/* Drawer Controls Toolbar */}
       {isDrawer && (
-        <div className="p-3 border-t border-mono-border bg-mono-light flex flex-col gap-3">
+        <div className="p-3 sm:p-3.5 border-t-2 border-slate-200 bg-slate-50/90 flex flex-col gap-3 rounded-b-3xl">
           {/* Top Row: Tools, Sizes & Actions */}
           <div className="flex flex-wrap items-center justify-between gap-2.5">
             {/* Tool Selectors */}
-            <div className="flex items-center space-x-1 bg-mono-white border border-mono-border rounded-lg p-0.5">
+            <div className="flex items-center space-x-1 bg-white border-2 border-slate-200 rounded-2xl p-1 shadow-xs">
               <button
                 type="button"
                 title="Freehand Brush"
                 onClick={() => setActiveTool('brush')}
-                className={`p-1.5 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+                className={`p-1.5 px-2 rounded-xl text-xs font-fun font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   activeTool === 'brush'
-                    ? 'bg-mono-text text-mono-white'
-                    : 'text-mono-secondary hover:text-mono-text'
+                    ? 'bg-skribbl-blue text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <Pen size={14} />
-                <span className="text-[10px] hidden sm:inline">Brush</span>
+                <span className="hidden sm:inline">Brush</span>
               </button>
 
               <button
                 type="button"
                 title="Straight Line"
                 onClick={() => setActiveTool('line')}
-                className={`p-1.5 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+                className={`p-1.5 px-2 rounded-xl text-xs font-fun font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   activeTool === 'line'
-                    ? 'bg-mono-text text-mono-white'
-                    : 'text-mono-secondary hover:text-mono-text'
+                    ? 'bg-skribbl-blue text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <Minus size={14} />
-                <span className="text-[10px] hidden sm:inline">Line</span>
+                <span className="hidden sm:inline">Line</span>
               </button>
 
               <button
                 type="button"
                 title="Rectangle"
                 onClick={() => setActiveTool('rectangle')}
-                className={`p-1.5 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+                className={`p-1.5 px-2 rounded-xl text-xs font-fun font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   activeTool === 'rectangle'
-                    ? 'bg-mono-text text-mono-white'
-                    : 'text-mono-secondary hover:text-mono-text'
+                    ? 'bg-skribbl-blue text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <RectangleHorizontal size={14} />
-                <span className="text-[10px] hidden sm:inline">Rect</span>
+                <span className="hidden sm:inline">Rect</span>
               </button>
 
               <button
                 type="button"
                 title="Square"
                 onClick={() => setActiveTool('square')}
-                className={`p-1.5 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+                className={`p-1.5 px-2 rounded-xl text-xs font-fun font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   activeTool === 'square'
-                    ? 'bg-mono-text text-mono-white'
-                    : 'text-mono-secondary hover:text-mono-text'
+                    ? 'bg-skribbl-blue text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <Square size={14} />
-                <span className="text-[10px] hidden sm:inline">Square</span>
+                <span className="hidden sm:inline">Square</span>
               </button>
 
               <button
                 type="button"
                 title="Circle / Ellipse"
                 onClick={() => setActiveTool('circle')}
-                className={`p-1.5 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+                className={`p-1.5 px-2 rounded-xl text-xs font-fun font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   activeTool === 'circle'
-                    ? 'bg-mono-text text-mono-white'
-                    : 'text-mono-secondary hover:text-mono-text'
+                    ? 'bg-skribbl-blue text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <Circle size={14} />
-                <span className="text-[10px] hidden sm:inline">Circle</span>
+                <span className="hidden sm:inline">Circle</span>
               </button>
 
               <button
                 type="button"
                 title="Eraser"
                 onClick={() => setActiveTool('eraser')}
-                className={`p-1.5 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+                className={`p-1.5 px-2 rounded-xl text-xs font-fun font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   activeTool === 'eraser'
-                    ? 'bg-mono-text text-mono-white'
-                    : 'text-mono-secondary hover:text-mono-text'
+                    ? 'bg-rose-500 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <Eraser size={14} />
-                <span className="text-[10px] hidden sm:inline">Eraser</span>
+                <span className="hidden sm:inline">Eraser</span>
               </button>
             </div>
 
-            {/* Brush Sizes */}
-            <div className="flex items-center space-x-1 bg-mono-white border border-mono-border rounded-lg p-0.5">
-              {BRUSH_SIZES.map((brush) => (
-                <button
-                  key={brush.label}
-                  type="button"
-                  title={`Size ${brush.label} (${brush.size}px)`}
-                  onClick={() => setCurrentSize(brush.size)}
-                  className={`px-2 py-1 text-xs font-bold rounded transition-all ${
-                    currentSize === brush.size
-                      ? 'bg-mono-text text-mono-white'
-                      : 'text-mono-secondary hover:text-mono-text'
-                  }`}
-                >
-                  {brush.label}
-                </button>
-              ))}
+            {/* Brush Sizes (S, M, L, XL) */}
+            <div className="flex items-center space-x-1 bg-white border-2 border-slate-200 rounded-2xl p-1 shadow-xs">
+              {BRUSH_SIZES.map((brush) => {
+                const isSelected = currentSize === brush.size;
+                return (
+                  <button
+                    key={brush.label}
+                    type="button"
+                    title={`${brush.label} - ${brush.fullName} (${brush.size}px)`}
+                    onClick={() => setCurrentSize(brush.size)}
+                    className={`min-w-[28px] h-7 px-2 flex items-center justify-center text-xs font-fun font-bold rounded-xl transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-skribbl-blue text-white shadow-xs scale-105'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 hover:scale-102'
+                    } active:scale-95`}
+                  >
+                    <span>{brush.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Undo & Clear Action Buttons */}
-            <div className="flex items-center space-x-1.5">
+            <div className="flex items-center space-x-2">
               <button
                 type="button"
                 title="Undo Stroke"
                 onClick={handleUndo}
-                className="p-1.5 rounded-lg border border-mono-border bg-mono-white text-mono-secondary hover:text-mono-text hover:border-mono-text transition-all flex items-center space-x-1"
+                className="px-3 py-1.5 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-fun font-bold text-xs hover:border-slate-300 hover:bg-slate-100 transition-all flex items-center space-x-1 cursor-pointer shadow-xs active:scale-95"
               >
                 <RotateCcw size={14} />
-                <span className="text-[10px] font-bold hidden sm:inline">Undo</span>
+                <span className="hidden sm:inline">Undo</span>
               </button>
 
               <button
                 type="button"
                 title="Clear Entire Canvas"
                 onClick={handleClear}
-                className="p-1.5 rounded-lg border border-mono-border bg-mono-white text-mono-secondary hover:text-mono-text hover:border-mono-text transition-all flex items-center space-x-1"
+                className="px-3 py-1.5 rounded-2xl border-2 border-rose-200 bg-rose-50 text-rose-700 font-fun font-bold text-xs hover:bg-rose-100 hover:border-rose-300 transition-all flex items-center space-x-1 cursor-pointer shadow-xs active:scale-95"
               >
                 <Trash2 size={14} />
-                <span className="text-[10px] font-bold hidden sm:inline">Clear</span>
+                <span className="hidden sm:inline">Clear</span>
               </button>
             </div>
           </div>
 
           {/* Bottom Row: Complete 14-Color Palette */}
-          <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-mono-secondary hidden md:inline">
+          <div className="flex items-center space-x-3">
+            <span className="text-[11px] font-fun font-bold uppercase tracking-wider text-slate-400 hidden md:inline">
               Color:
             </span>
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               {PALETTE_COLORS.map((color) => {
                 const isSelected = activeTool !== 'eraser' && currentColor === color.hex;
                 return (
@@ -926,10 +929,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                       }
                       setCurrentColor(color.hex);
                     }}
-                    className={`w-6 h-6 rounded-md border transition-all cursor-pointer ${
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border border-black/10 transition-all cursor-pointer ${
                       isSelected
-                        ? 'ring-2 ring-mono-text ring-offset-1 scale-110 shadow-xs'
-                        : 'border-mono-border hover:scale-105'
+                        ? 'ring-3 ring-skribbl-blue scale-115 shadow-sm z-10'
+                        : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: color.hex }}
                   />
