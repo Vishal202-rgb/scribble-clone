@@ -1,164 +1,370 @@
-# Skribbl.io Clone &mdash; Real-Time Multiplayer Drawing & Guessing Game
+# Skribbl.io Clone — Real-Time Multiplayer Drawing & Guessing Game
 
-A full-stack, real-time multiplayer drawing and guessing game built with React, TypeScript, Vite, Node.js, Express, and Socket.IO. Designed with a strictly monochromatic, minimalist aesthetic.
+A full-stack, real-time multiplayer drawing and guessing game inspired by Skribbl.io. Built using **React, TypeScript, Node.js, Express.js, and Socket.IO**, this application allows players to create rooms, invite friends, draw words, and compete through real-time guessing.
 
-![image alt](https://github.com/Vishal202-rgb/scribble-clone/blob/489e68b6083383a2e5d634c6c25ae9a12563e172/client/public/homeScreen.png)
----
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Vishal202-rgb/scribble-clone/main/client/public/homeScreen.png" alt="Skribbl Clone Homepage" width="100%" />
+</p>
 
-## Live Demo & Deployment
-- **Frontend URL (Vercel)**: `https://scribble-clone-zeta.vercel.app` 
-- **Backend WebSocket URL (Render / Railway)**: `https://scribble-clone-server-ov6l.onrender.com`
-
----
-
-## Tech Stack
-
-### Frontend
-- **Framework**: React 18 with TypeScript
-- **Bundler & Tooling**: Vite
-- **Styling**: Tailwind CSS (Custom Monochromatic Palette)
-- **Icons**: Lucide React
-- **Networking**: `socket.io-client`
-- **Canvas**: Native HTML5 Canvas API with normalized coordinate scaling ($800 \times 600$)
-
-### Backend
-- **Runtime**: Node.js (ES Modules)
-- **Framework**: Express.js
-- **WebSockets**: Socket.IO
-- **State Management**: In-Memory Maps (`RoomStore`) with Object-Oriented Domain Models (`Room`, `Game`, `Player`)
+<p align="center">
+  <b>Draw • Guess • Compete • Have Fun!</b>
+</p>
 
 ---
 
-## Features
+## 🚀 Live Demo
+
+| Service | URL |
+|---|---|
+| Frontend | https://scribble-clone-zeta.vercel.app |
+| Backend | https://scribble-clone-server-ov6l.onrender.com |
+| Backend Health Check | https://scribble-clone-server-ov6l.onrender.com/api/health |
+
+---
+
+## ✨ Features
 
 ### 1. Multiplayer Room & Lobby Management
-- **Instant Room Creation**: Host configures player capacity (2–20), rounds (2–10), and draw time (15–240s).
-- **Easy Joining**: Join via unique 6-character room codes or shareable one-click invite links (`?room=CODE`).
-- **Host Controls**: Host identification, dynamic host re-election if the host leaves, and lobby player status.
-- **In-Memory Store**: Fast, persistent in-memory Map structure for managing active rooms and socket mappings.
+- Create public and private game rooms.
+- Join rooms using unique 6-character room codes.
+- Shareable room invitation links.
+- Host controls and lobby management.
+- Configurable player capacity, rounds, and drawing duration.
+- Player list and lobby status.
 
 ### 2. Turn-Based Game Engine
-- **Turn Rotation**: Cyclical drawer rotation ensuring each player draws once per round.
-- **Word Selection**: Drawer picks 1 of 3 (configurable up to 5) categorized random words. Auto-picks if drawer times out.
-- **Server Authoritative Timer**: Central countdown timer synchronized across all participants.
-- **Round End & Game Over**: Detailed round summary with revealed words, round scores, next drawer announcements, and final winner podium.
+- Automatic turn rotation between players.
+- Drawer selects a word from multiple options.
+- Categorized word selection.
+- Server-controlled game timer.
+- Automatic word selection when the drawer's selection time expires.
+- Round completion and final winner announcement.
+- Leaderboard with player rankings.
 
-### 3. Real-Time HTML5 Drawing Canvas
-- **Fluid Freehand Drawing**: Low-latency stroke streaming using WebSockets.
-- **Resolution-Independent Coordinates**: Drawing coordinates are normalized to an $800 \times 600$ coordinate space, ensuring precision across mobile, tablets, and desktop displays.
-- **Monochromatic Drawing Tools**:
-  - Ink Palette: Black (`#222222`), Dark Grey (`#555555`), Mid Grey (`#888888`), Light Grey (`#BBBBBB`), and White (`#FFFFFF`).
-  - Brush Sizes: Small (3px), Medium (7px), Large (14px), and Extra Large (26px).
-  - Dedicated Eraser tool.
-  - Multi-step Undo: Restores stroke history across all clients.
-  - Clear Canvas: Instant wipe with remote broadcast.
-- **Role Permissions**: Only the designated drawer can draw; guessing players are locked in viewer mode.
+### 3. Real-Time Drawing Canvas
+- HTML5 Canvas-based drawing interface.
+- Real-time drawing synchronization using Socket.IO.
+- Freehand drawing and geometric drawing tools.
+- 14-color drawing palette.
+- Multiple brush sizes: Small, Medium, Large, and Extra Large.
+- Dedicated eraser tool.
+- Multi-step undo functionality.
+- Clear canvas functionality.
+- Normalized drawing coordinates for different screen sizes.
+- Role-based drawing permissions.
 
-### 4. Real-Time Chat & Guessing System
-- **Case-Insensitive & Whitespace Trimming**: Robust word matching logic.
-- **Anti-Cheat Word Secrecy**: The actual word remains exclusively on the server until the round finishes. Guessers receive only masked blanks (`_ _ _ _`).
-- **Progressive Hint Reveals**: Server systematically reveals letters over time (e.g. `_ A _ E _`).
-- **Dynamic Scoring**: Faster guesses earn higher scores (up to 500 pts). First correct guesser receives bonus points. Drawers earn reward points for every player who guesses correctly.
-- **Near-Miss Feedback**: Informs guessers when their guess is within 1 character distance of the correct word.
-- **Role Restrictions**: Drawers cannot guess; players who have already guessed correctly cannot leak the word in public chat.
+### 4. Real-Time Chat & Guessing
+- Instant messaging within game rooms.
+- Case-insensitive answer validation.
+- Automatic correct-guess detection.
+- Masked secret words for guessing players.
+- Progressive hints during gameplay.
+- Near-miss feedback for close guesses.
+- Drawer and guesser role restrictions.
+- Real-time score updates.
+
+### 5. Avatar Customization & User Experience
+- Customizable player avatars.
+- Multiple avatar colors, eye styles, and mouth expressions.
+- Randomize avatar option.
+- Nickname customization.
+- Colorful, playful interface.
+- Responsive UI for desktop and mobile devices.
 
 ---
 
-## Folder Structure
+## 🛠️ Tech Stack
 
+### Frontend
+| Technology | Purpose |
+|---|---|
+| React | Component-based UI |
+| TypeScript | Type safety |
+| Vite | Development server and build tool |
+| Tailwind CSS | Styling and responsive layouts |
+| Lucide React | Icons |
+| Socket.IO Client | Real-time communication |
+| HTML5 Canvas | Drawing and rendering |
+
+### Backend
+| Technology | Purpose |
+|---|---|
+| Node.js | JavaScript runtime |
+| Express.js | Backend server and API |
+| Socket.IO | Real-time bidirectional communication |
+| JavaScript ES Modules | Backend module system |
+| In-memory Maps | Active room and game state management |
+
+---
+
+## 🏗️ System Architecture
+
+The application follows a client-server architecture.
+
+1. **Frontend:** React handles the user interface, drawing canvas, chat, lobby, and game controls.
+2. **Communication:** Socket.IO establishes real-time communication between clients and the backend.
+3. **Backend:** Node.js and Express handle application requests and Socket.IO events.
+4. **Game Engine:** Room, Game, and Player classes manage game-related logic.
+5. **Room Management:** In-memory Maps maintain active rooms and their associated player and game information.
+
+### Real-Time Drawing Flow
+
+```text
+Drawer
+   |
+   | Drawing Events
+   v
+React Canvas
+   |
+   | Socket.IO
+   v
+Backend Server
+   |
+   | Room Broadcast
+   v
+Other Players
+   |
+   v
+Updated Canvas
 ```
-skribbl-clone/
+
+### Important Design Decision
+
+The current implementation uses in-memory data structures for active rooms and game state. This provides fast access but does not persist active games across backend restarts. Redis or a persistent database can be introduced for future scalability and recovery.
+
+---
+
+## 📁 Project Structure
+
+```text
+scribble-clone/
+│
 ├── client/
+│   ├── public/
+│   │   └── homeScreen.png
+│   │
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Lobby/          # Lobby screen, player list & host controls
-│   │   │   ├── GameCanvas/     # HTML5 Canvas, stroke sync & drawing tools
-│   │   │   ├── Chat/           # Real-time chat & guessing stream
-│   │   │   ├── Leaderboard/    # Live rankings, points & drawer badges
-│   │   │   ├── GameTimer/      # Server timer, round indicator & masked hints
-│   │   │   ├── WordModal/      # Drawer word picker modal
-│   │   │   └── GameOver/       # Match conclusion & podium standings
+│   │   │   ├── Avatar/
+│   │   │   ├── Lobby/
+│   │   │   ├── GameCanvas/
+│   │   │   ├── Chat/
+│   │   │   ├── Leaderboard/
+│   │   │   ├── GameTimer/
+│   │   │   ├── WordModal/
+│   │   │   └── GameOver/
+│   │   │
 │   │   ├── hooks/
-│   │   │   └── useSocket.ts    # React hook for socket state & event dispatchers
+│   │   │   └── useSocket.ts
+│   │   │
 │   │   ├── pages/
-│   │   │   ├── HomePage.tsx    # Monochromatic landing page
-│   │   │   ├── CreateRoomPage.tsx # Host settings
-│   │   │   ├── JoinRoomPage.tsx # Room code entry
-│   │   │   ├── LobbyPage.tsx   # Waiting room
-│   │   │   └── GamePage.tsx    # Live game dashboard
+│   │   │   ├── HomePage.tsx
+│   │   │   ├── CreateRoomPage.tsx
+│   │   │   ├── JoinRoomPage.tsx
+│   │   │   ├── LobbyPage.tsx
+│   │   │   └── GamePage.tsx
+│   │   │
 │   │   ├── services/
-│   │   │   └── socket.ts       # Socket.IO client initialization
+│   │   │   └── socket.ts
+│   │   │
 │   │   ├── types/
-│   │   │   └── index.ts        # TypeScript data contracts
-│   │   ├── App.tsx             # Root layout & view routing
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── App.tsx
 │   │   ├── main.tsx
-│   │   └── index.css           # Tailwind directives & monochromatic scrollbar
-│   ├── index.html
-│   ├── package.json
-│   ├── tailwind.config.js      # Monochromatic color definitions
-│   └── vite.config.ts
+│   │   └── index.css
+│   │
+│   └── package.json
+│
 ├── server/
 │   ├── src/
 │   │   ├── socket/
-│   │   │   ├── roomHandler.js    # create_room, join_room, player_joined, player_left
-│   │   │   ├── gameHandler.js    # start_game, word_chosen
-│   │   │   ├── drawingHandler.js # draw_start, draw_move, draw_end, canvas_clear, draw_undo
-│   │   │   └── chatHandler.js    # guess, guess_result, chat, chat_message
+│   │   │   ├── roomHandler.js
+│   │   │   ├── gameHandler.js
+│   │   │   ├── drawingHandler.js
+│   │   │   └── chatHandler.js
+│   │   │
 │   │   ├── game/
-│   │   │   ├── Room.js           # Room class
-│   │   │   ├── Game.js           # Turn rotation, timer, scoring & hints
-│   │   │   └── Player.js         # Player state & scores
+│   │   │   ├── Room.js
+│   │   │   ├── Game.js
+│   │   │   └── Player.js
+│   │   │
 │   │   ├── utils/
-│   │   │   └── roomStore.js      # Map-based room registry & code generator
+│   │   │   └── roomStore.js
+│   │   │
 │   │   ├── words/
-│   │   │   ├── wordList.json     # Categorized vocabulary
-│   │   │   └── wordService.js    # Word selection & hint masking
-│   │   └── server.js             # Express & Socket.IO server
+│   │   │   ├── wordList.json
+│   │   │   └── wordService.js
+│   │   │
+│   │   └── server.js
+│   │
 │   └── package.json
-├── README.md
-└── architecture.md
+│
+├── architecture.md
+└── README.md
 ```
 
 ---
 
-## Local Setup & Run Instructions
+## ⚙️ Local Setup & Installation
 
 ### Prerequisites
-- Node.js &ge; 18
-- npm &ge; 9
 
-### 1. Start the Backend Server
+- Node.js 18 or higher
+- npm 9 or higher
+- Git
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Vishal202-rgb/scribble-clone.git
+
+cd scribble-clone
+```
+
+### 2. Setup Backend
+
 ```bash
 cd server
 npm install
+```
+
+Create a `.env` file inside the `server` directory:
+
+```env
+PORT=5000
+NODE_ENV=development
+CLIENT_ORIGIN=http://localhost:3000
+```
+
+Start the backend:
+
+```bash
 npm start
 ```
-The backend server will run on `http://localhost:5000`.
-Health endpoint: `http://localhost:5000/api/health`.
 
-### 2. Start the Frontend Client
-In a separate terminal window:
+Backend URL:
+
+```text
+http://localhost:5000
+```
+
+Health check:
+
+```text
+http://localhost:5000/api/health
+```
+
+### 3. Setup Frontend
+
+Open another terminal:
+
 ```bash
 cd client
 npm install
+```
+
+Create a `.env` file inside the `client` directory:
+
+```env
+VITE_BACKEND_URL=http://localhost:5000
+```
+
+Start the frontend:
+
+```bash
 npm run dev
 ```
-The Vite development server will start on `http://localhost:3000`.
 
-### 3. Playing Multi-Tab Locally
-1. Open `http://localhost:3000` in Tab 1, enter a nickname (e.g. `Alice`), and click **Create Room**.
-2. Copy the 6-character room code or the invite link.
-3. Open `http://localhost:3000` in Tab 2 and Tab 3, enter nicknames (e.g. `Bob`, `Charlie`), and join using the room code.
-4. Alice (Host) clicks **Start Game**.
-5. Drawer chooses a word and draws on canvas; guessers see masked blanks and type guesses into chat.
+Frontend URL:
 
-## Testing & Verification
-The application has been verified against:
-- [x] Multi-session room creation and joining.
-- [x] Real-time stroke broadcasting and canvas clearing.
-- [x] Turn rotation and word selection modal.
-- [x] Progressive letter hint unlocks and countdown timer synchronization.
-- [x] Case-insensitive guess evaluation and anti-cheat word masking.
-- [x] Dynamic score allocation and live leaderboard ranking.
-- [x] Player disconnection cleanup and automatic host re-election.
-- [x] Strict monochromatic design scheme.
+```text
+http://localhost:3000
+```
+
+---
+
+## 🎮 How to Play
+
+1. Open the application and enter your nickname.
+2. Customize your avatar.
+3. Create a room or join an existing room using its code.
+4. Invite friends to the room.
+5. The host starts the game.
+6. The selected drawer chooses a word.
+7. Draw the selected word while other players guess through chat.
+8. Earn points for correct guesses.
+9. Complete the rounds and check the final leaderboard.
+
+---
+
+## 🧪 Testing Checklist
+
+The following areas are covered by the project's multiplayer testing:
+
+- [x] Room creation and joining.
+- [x] Multi-player room sessions.
+- [x] Real-time drawing synchronization.
+- [x] Canvas clearing and undo.
+- [x] Word selection and turn rotation.
+- [x] Countdown timer synchronization.
+- [x] Correct guess validation.
+- [x] Progressive hints.
+- [x] Score allocation and leaderboard.
+- [x] Host management and player disconnection handling.
+- [x] Responsive interface testing.
+
+---
+
+## 🚀 Deployment
+
+The application is deployed using:
+
+- **Frontend:** Vercel
+- **Backend:** Render
+
+Production environment configuration:
+
+Frontend environment variable:
+
+```env
+VITE_BACKEND_URL=https://scribble-clone-server-ov6l.onrender.com
+```
+
+Backend environment variables:
+
+```env
+PORT=<provided-by-hosting-platform>
+NODE_ENV=production
+CLIENT_ORIGIN=https://scribble-clone-zeta.vercel.app
+```
+
+The backend uses the hosting platform's assigned `PORT` in production.
+
+---
+
+## 🔮 Future Improvements
+
+- Player reconnection and session recovery.
+- Persistent user accounts and game history.
+- Redis-based shared game state.
+- Improved scalability for multiple backend instances.
+- Additional drawing tools and word categories.
+- Enhanced moderation and anti-cheat mechanisms.
+
+---
+
+## 👨‍💻 Author
+
+**Vishal Kumar**
+
+Full Stack Developer | Generative AI Enthusiast
+
+- GitHub: [Vishal202-rgb](https://github.com/Vishal202-rgb)
+- Project Repository: [Skribbl Clone](https://github.com/Vishal202-rgb/scribble-clone)
+
+---
+
+<p align="center">
+  <b>Built with ❤️ using React, Node.js & Socket.IO</b>
+</p>
