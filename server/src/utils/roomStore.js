@@ -62,6 +62,16 @@ class RoomStore {
   getAllRoomsCount() {
     return this.rooms.size;
   }
+
+  clearAll() {
+    for (const room of this.rooms.values()) {
+      if (room && room.game && typeof room.game.clearTimer === 'function') {
+        room.game.clearTimer();
+      }
+    }
+    this.rooms.clear();
+    this.socketToRoom.clear();
+  }
 }
 
 export const roomStore = new RoomStore();

@@ -66,19 +66,56 @@ export interface GameOverData {
   leaderboard: Player[];
 }
 
+export type DrawingTool = 'brush' | 'circle' | 'ellipse' | 'rectangle' | 'square' | 'line' | 'eraser';
+
+export interface NormalizedPoint {
+  x: number;
+  y: number;
+}
+
+export interface DrawingStroke {
+  strokeId: string;
+  playerId: string;
+  tool: DrawingTool;
+  color: string;
+  brushSize: number;
+  points: NormalizedPoint[];
+  timestamp: number;
+  sequence: number;
+}
+
+export interface StrokeChunkData {
+  strokeId: string;
+  playerId: string;
+  tool: DrawingTool;
+  color: string;
+  brushSize: number;
+  points: NormalizedPoint[];
+  sequence: number;
+}
+
 export interface DrawDataPoint {
   type: 'start' | 'move' | 'end';
   x?: number;
   y?: number;
   color?: string;
   size?: number;
+  tool?: DrawingTool;
+  strokeId?: string;
+  points?: NormalizedPoint[];
 }
 
 export interface CompletedStroke {
-  type: 'stroke';
+  strokeId?: string;
+  playerId?: string;
+  type?: 'stroke';
+  tool?: DrawingTool;
   color: string;
   size: number;
-  points: { x: number; y: number }[];
+  brushSize?: number;
+  points: NormalizedPoint[];
+  timestamp?: number;
+  sequence?: number;
 }
 
 export interface ChatMessage {

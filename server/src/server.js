@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { execSync } from 'child_process';
 import { registerRoomHandler } from './socket/roomHandler.js';
 import { registerGameHandler } from './socket/gameHandler.js';
 import { registerDrawingHandler } from './socket/drawingHandler.js';
@@ -154,10 +155,33 @@ io.on('connection', (socket) => {
 // Error handling for HTTP server (prevents unhandled EADDRINUSE crashes)
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
+    let occupyingProcessInfo = '';
+    try {
+      if (process.platform === 'win32') {
+        const netstatOutput = execSync(`netstat -ano | findstr :${PORT}`, { encoding: 'utf8', timeout: 2000 });
+        const lines = netstatOutput.trim().split('\n');
+        const listeningLine = lines.find((l) => l.includes('LISTENING') || l.includes('Listen'));
+        if (listeningLine) {
+          const parts = listeningLine.trim().split(/\s+/);
+          const pid = parts[parts.length - 1];
+          occupyingProcessInfo = `\nActive Listener PID: ${pid}`;
+          try {
+            const tasklist = execSync(`tasklist /FI "PID eq ${pid}" /FO CSV /NH`, { encoding: 'utf8', timeout: 2000 });
+            const procName = tasklist.split(',')[0]?.replace(/"/g, '');
+            if (procName) {
+              occupyingProcessInfo += ` (${procName.trim()})`;
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (_) {
+      // ignore inspection failures
+    }
+
     console.error('\n============================================================');
     console.error(`❌ PORT CONFLICT ERROR: Port ${PORT} is already in use.`);
     console.error('============================================================');
-    console.error(`Another process is already listening on port ${PORT}.`);
+    console.error(`Another process is already listening on port ${PORT}.${occupyingProcessInfo}`);
     console.error('This typically happens if a previous instance of the server');
     console.error('is still running in another terminal or background task.\n');
     console.error('How to resolve safely without affecting other applications:');
@@ -167,8 +191,7 @@ server.on('error', (err) => {
     console.error('\n2. Stop that process:');
     console.error('   PowerShell: Stop-Process -Id <PID> -Force');
     console.error('   CMD:        taskkill /PID <PID> /F');
-    console.error('\n3. Or configure a different port:');
-    console.error('   Set PORT=<new_port> in server/.env and update client/.env (VITE_BACKEND_URL).');
+    console.error('\n3. Note: The server port remains strictly ' + PORT + ' for local development.');
     console.error('============================================================\n');
     process.exit(1);
   } else {
@@ -177,22 +200,75 @@ server.on('error', (err) => {
   }
 });
 
-// Graceful shutdown handling
+// Idempotent graceful shutdown handling
+let isShuttingDown = false;
+
 function handleShutdown(signal) {
+  if (isShuttingDown) {
+    return;
+  }
+  isShuttingDown = true;
+
   console.log(`\nReceived ${signal}. Shutting down server gracefully...`);
-  server.close(() => {
-    console.log(`HTTP/WebSocket server closed. Port ${PORT} released.`);
-    process.exit(0);
+
+  // 1. Clear all background game and room timers/intervals
+  try {
+    roomStore.clearAll();
+  } catch (err) {
+    // ignore
+  }
+
+  // 2. Disconnect all connected Socket.IO sockets and close Socket.IO
+  try {
+    if (io) {
+      if (typeof io.disconnectSockets === 'function') {
+        io.disconnectSockets(true);
+      }
+      io.close();
+    }
+  } catch (err) {
+    // ignore
+  }
+
+  // 3. Immediately close all TCP connections and idle sockets
+  try {
+    if (typeof server.closeAllConnections === 'function') {
+      server.closeAllConnections();
+    }
+    if (typeof server.closeIdleConnections === 'function') {
+      server.closeIdleConnections();
+    }
+  } catch (err) {
+    // ignore
+  }
+
+  // 4. Close the HTTP server
+  server.close((err) => {
+    if (err) {
+      console.error('Error during server close:', err);
+      process.exit(1);
+    } else {
+      console.log(`HTTP/WebSocket server closed. Port ${PORT} released.`);
+      process.exit(0);
+    }
   });
 
-  setTimeout(() => {
-    console.error('Forcing shutdown after timeout.');
-    process.exit(1);
-  }, 3000).unref();
+  // 5. Fail-safe timeout to force process exit if server.close hangs
+  const forceExitTimeout = setTimeout(() => {
+    console.warn(`[Shutdown Timeout] Force closing process after 1500ms.`);
+    process.exit(0);
+  }, 1500);
+  forceExitTimeout.unref();
 }
 
-process.on('SIGINT', () => handleShutdown('SIGINT'));
-process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+// Signal handlers
+['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGBREAK'].forEach((sig) => {
+  try {
+    process.on(sig, () => handleShutdown(sig));
+  } catch (err) {
+    // SIGBREAK may not be available on all platforms
+  }
+});
 
 server.listen(PORT, HOST, () => {
   console.log(`===============================================`);

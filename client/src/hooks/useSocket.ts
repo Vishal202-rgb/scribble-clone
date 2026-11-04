@@ -10,7 +10,10 @@ import {
   GameOverData,
   ChatMessage,
   DrawDataPoint,
-  CompletedStroke
+  CompletedStroke,
+  DrawingStroke,
+  DrawingTool,
+  NormalizedPoint
 } from '../types';
 
 export function useSocket() {
@@ -396,6 +399,25 @@ export function useSocket() {
     socket.emit('draw_end');
   }, []);
 
+  const sendStrokeStart = useCallback(
+    (strokeId: string, tool: DrawingTool, color: string, brushSize: number, point: NormalizedPoint, sequence = 0) => {
+      socket.emit('stroke_start', { strokeId, tool, color, brushSize, point, sequence, timestamp: Date.now() });
+    },
+    []
+  );
+
+  const sendStrokeChunk = useCallback((strokeId: string, points: NormalizedPoint[], sequence = 0) => {
+    socket.emit('stroke_chunk', { strokeId, points, sequence });
+  }, []);
+
+  const sendStrokeEnd = useCallback((strokeId: string, finalStroke?: Partial<DrawingStroke>) => {
+    socket.emit('stroke_end', { strokeId, finalStroke });
+  }, []);
+
+  const requestCanvasState = useCallback(() => {
+    socket.emit('get_canvas_state');
+  }, []);
+
   const clearCanvas = useCallback(() => {
     socket.emit('canvas_clear');
   }, []);
@@ -439,6 +461,10 @@ export function useSocket() {
     sendDrawStart,
     sendDrawMove,
     sendDrawEnd,
+    sendStrokeStart,
+    sendStrokeChunk,
+    sendStrokeEnd,
+    requestCanvasState,
     clearCanvas,
     undoDrawing,
     sendGuess,
