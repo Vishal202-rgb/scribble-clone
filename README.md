@@ -3,11 +3,17 @@
 A full-stack, real-time multiplayer drawing and guessing game inspired by Skribbl.io. Built using **React, TypeScript, Node.js, Express.js, and Socket.IO**, this application allows players to create rooms, invite friends, draw words, and compete through real-time guessing.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Vishal202-rgb/scribble-clone/main/client/public/homeScreen.png" alt="Skribbl Clone Homepage" width="100%" />
+  <a href="https://github.com/user-attachments/assets/6307a016-f298-48ec-a429-5728f9d7bb1a">
+    <img
+      src="https://raw.githubusercontent.com/Vishal202-rgb/scribble-clone/main/client/public/homeScreen.png"
+      alt="Watch Skribbl Clone Demo"
+      width="100%"
+    />
+  </a>
 </p>
 
 <p align="center">
-  <b>Draw • Guess • Compete • Have Fun!</b>
+  <b>▶ Watch Project Demo | Draw • Guess • Compete • Have Fun!</b>
 </p>
 
 ---
