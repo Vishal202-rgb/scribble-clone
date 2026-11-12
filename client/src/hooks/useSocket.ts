@@ -160,6 +160,18 @@ export function useSocket() {
         setWordOptions([]);
       }
 
+      setGameState((prev) => ({
+        phase: 'CHOOSING_WORD',
+        round: data.round,
+        totalRounds: data.totalRounds,
+        drawerId: data.drawerId,
+        drawerName: data.drawerName,
+        word: '',
+        hints: '',
+        timeLeft: 15,
+        ...(prev || {})
+      }));
+
       if (data.drawerId) {
         setRoom((prev) => {
           if (!prev) return null;
@@ -193,6 +205,7 @@ export function useSocket() {
     function onRoundEnd(data: RoundEndData) {
       setRoundEndData(data);
       setWordOptions([]);
+      setGameState((prev) => (prev ? { ...prev, phase: 'ROUND_END', timeLeft: 0 } : null));
       if (data.scores) {
         setRoom((prev) => {
           if (!prev) return null;
@@ -214,6 +227,7 @@ export function useSocket() {
       setGameOverData(data);
       setRoundEndData(null);
       setWordOptions([]);
+      setGameState((prev) => (prev ? { ...prev, phase: 'GAME_OVER', timeLeft: 0 } : null));
     }
 
     function onGuessResult(data: { correct: boolean; playerId: string; playerName: string; points: number; leaderboard?: Player[] }) {
@@ -229,6 +243,16 @@ export function useSocket() {
 
       setCurrentUser((prev) => {
         if (!prev) return null;
+        if (data.leaderboard) {
+          const me = data.leaderboard.find((p) => p.id === prev.id);
+          if (me) {
+            return {
+              ...prev,
+              ...me,
+              hasGuessed: prev.id === data.playerId ? true : (me.hasGuessed ?? prev.hasGuessed)
+            };
+          }
+        }
         if (prev.id === data.playerId && data.correct) {
           return {
             ...prev,
@@ -260,7 +284,16 @@ export function useSocket() {
 
     function onTimerTick(data: { timeLeft: number }) {
       setGameState((prev) => {
-        if (!prev) return null;
+        if (!prev) {
+          return {
+            phase: 'DRAWING',
+            round: 1,
+            totalRounds: 3,
+            drawerId: null,
+            hints: '',
+            timeLeft: data.timeLeft
+          };
+        }
         return {
           ...prev,
           timeLeft: data.timeLeft

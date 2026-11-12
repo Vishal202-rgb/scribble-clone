@@ -42,6 +42,10 @@ export function registerGameHandler(io, socket) {
       }
 
       console.log(`[Game Starting] Room: ${room.id} started by Host ${mapping.playerId}`);
+      io.to(room.id).emit('game_starting', {
+        message: 'Game is starting...',
+        roomId: room.id
+      });
       room.startGame(io);
 
       if (typeof callback === 'function') {

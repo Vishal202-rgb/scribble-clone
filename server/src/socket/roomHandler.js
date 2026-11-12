@@ -175,41 +175,6 @@ export function registerRoomHandler(io, socket) {
       console.error('Error on socket disconnect cleanup:', err);
     }
   });
-
-  /**
-   * Start game handler (host only)
-   */
-  socket.on('start_game', (payload = {}, callback) => {
-    const mapping = roomStore.getSocketMapping(socket.id);
-    if (!mapping) return;
-
-    const room = roomStore.getRoom(mapping.roomId);
-    if (!room) return;
-
-    if (room.hostId !== mapping.playerId) {
-      const errorMsg = 'Only the room host can start the game.';
-      if (typeof callback === 'function') callback({ success: false, error: errorMsg });
-      socket.emit('error_message', { message: errorMsg });
-      return;
-    }
-
-    if (room.players.size < 2) {
-      const errorMsg = 'At least 2 players are required to start the game.';
-      if (typeof callback === 'function') callback({ success: false, error: errorMsg });
-      socket.emit('error_message', { message: errorMsg });
-      return;
-    }
-
-    console.log(`[Game Start Requested] Room: ${room.id} by Host ${mapping.playerId}`);
-    io.to(room.id).emit('game_starting', {
-      message: 'Game is starting...',
-      roomId: room.id
-    });
-
-    if (typeof callback === 'function') {
-      callback({ success: true, message: 'Game started' });
-    }
-  });
 }
 
 /**

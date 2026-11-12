@@ -58,11 +58,11 @@ export class Room {
     const player = this.players.get(playerId);
     if (!player) return null;
 
+    this.players.delete(playerId);
+
     if (this.game) {
       this.game.handlePlayerDeparture(playerId);
     }
-
-    this.players.delete(playerId);
 
     // If leaving player was host, promote next player in line
     if (this.hostId === playerId && this.players.size > 0) {
@@ -97,6 +97,9 @@ export class Room {
   startGame(io) {
     if (this.players.size < 2) {
       throw new Error('At least 2 players are required to start the game.');
+    }
+    if (this.game && typeof this.game.clearTimer === 'function') {
+      this.game.clearTimer();
     }
     this.gameState = 'IN_GAME';
     this.game = new Game(this, io);

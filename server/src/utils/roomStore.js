@@ -42,6 +42,14 @@ class RoomStore {
 
   deleteRoom(roomId) {
     if (!roomId) return false;
+    const room = this.rooms.get(roomId.toUpperCase());
+    if (room && room.game && typeof room.game.clearTimer === 'function') {
+      try {
+        room.game.clearTimer();
+      } catch (e) {
+        // ignore
+      }
+    }
     return this.rooms.delete(roomId.toUpperCase());
   }
 

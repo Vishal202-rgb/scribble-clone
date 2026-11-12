@@ -1,6 +1,8 @@
+import { server } from './src/server.js';
 import { io } from '../client/node_modules/socket.io-client/build/esm/index.js';
 
-const SERVER_URL = 'http://localhost:5000';
+const PORT = 5000;
+const SERVER_URL = `http://localhost:${PORT}`;
 
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
